@@ -1,0 +1,38 @@
+# ./docker-compose.yml
+
+version: '3'
+
+services:
+  ci3_db:
+    container_name: ci3_db 
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ci3_db_1
+      MYSQL_USER: devuser
+      MYSQL_PASSWORD: devpass
+    ports:
+      - "1156:3306"
+    volumes:
+      - ci3_data:/var/lib/mysql
+  ci3_web:
+    container_name: ci3_web
+    build: ./server/
+    depends_on:
+      - ci3_db
+    volumes:
+      - ./server/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./server/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ./src/:/var/www/html/
+    ports:
+      - "1056:80"
+    stdin_open: true
+    tty: true
+  ci3_adminer:
+    container_name: ci3_adminer
+    image: adminer
+    restart: always
+    ports:
+      - "1256:8080"
+volumes:
+  ci3_data:
